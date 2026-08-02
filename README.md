@@ -4,14 +4,16 @@ Nous is a private progressive web app for a couple: a shared space for daily
 messages, mood tracking, and the moments worth counting. The full product
 concept lives in [Nous-Concept.md](Nous-Concept.md).
 
-This repository currently implements Phase 1 of the roadmap: home dashboard,
-message of the day, day counter, mood tracking, and navigation.
+This repository implements Phase 1 (home dashboard, message of the day, day
+counter, mood tracking, navigation) and part of Phase 2 of the roadmap:
+memories (souvenirs) and the map. The garden is not built yet.
 
 ## Stack
 
 - React + TypeScript, built with Vite
 - Tailwind CSS v4 for styling
-- Supabase (Postgres + Auth) as the backend
+- Supabase (Postgres + Auth + Storage) as the backend
+- Leaflet / react-leaflet with OpenStreetMap tiles for the map
 - `vite-plugin-pwa` for offline support and installability
 - React Router for navigation
 
@@ -28,6 +30,8 @@ src/
     messages/
     mood/
     counter/
+    memories/
+    map/
   types/           shared TypeScript types, including the Supabase schema
 
 supabase/
@@ -55,8 +59,9 @@ schema:
 npx supabase db push --db-url <your-connection-string>
 ```
 
-Or paste the contents of `supabase/migrations/0001_init.sql` (and optionally
-`supabase/seed.sql`) into the Supabase SQL editor.
+Or paste the contents of each file under `supabase/migrations/`, in order
+(`0001_init.sql`, then `0002_memories.sql`), and optionally `supabase/seed.sql`,
+into the Supabase SQL editor.
 
 Create one Supabase Auth user (email and password) for the couple to share
 (see "Authentication" below).
@@ -96,7 +101,7 @@ distinguish who did what.
 
 ## Data model
 
-See `supabase/migrations/0001_init.sql` for the source of truth. Summary:
+See `supabase/migrations/` for the source of truth. Summary:
 
 - `messages`: the pool of daily messages (compliments, memories, quotes,
   jokes, encouragements, declarations)
@@ -104,9 +109,30 @@ See `supabase/migrations/0001_init.sql` for the source of truth. Summary:
 - `events`: important dates, optionally recurring yearly
 - `couple_settings`: a single row holding the relationship start date used by
   the day counter
+- `memories`: souvenirs (title, date, description, optional location name and
+  coordinates, optional music link)
+- `memory_photos`: one or more photos per memory, stored in the
+  `memory-photos` Supabase Storage bucket (public, but paths are random
+  UUIDs, so effectively unguessable; the app itself still sits behind the
+  shared login)
 
 Row Level Security is enabled on every table, restricted to authenticated
 requests (see "Authentication" above for what that means in practice).
+
+### Map
+
+The map (`/map`) is not backed by its own table: it plots every memory that
+has latitude/longitude set. Coordinates are captured by tapping a small
+Leaflet map in the "new memory" form (`src/modules/memories/LocationPicker.tsx`);
+there is no geocoding step, which keeps the app free of any third-party API
+key. Memories without coordinates simply do not appear on the map.
+
+### Quick access grid
+
+Modules that are not already surfaced on the home screen (unlike messages,
+mood, and the counter, which have their own cards) get a small cute icon tile
+instead, added to the list in `src/modules/home/QuickAccessGrid.tsx`. New
+modules should extend that list rather than growing the bottom navigation.
 
 ### Message of the day rotation
 
@@ -141,6 +167,7 @@ client-side routes (React Router) need to work on deep links and refresh.
 
 ## Roadmap
 
-Phase 1 (this repository): home, message of the day, counter, mood,
-navigation. Phases 2 to 4 (memories gallery, map, garden, food picker, and
-further polish) are described in [Nous-Concept.md](Nous-Concept.md).
+Phase 1: home, message of the day, counter, mood, navigation. Phase 2
+(partial, this branch): memories gallery and map. Not yet built: the garden,
+the food picker, and further polish (Phases 2 remainder, 3, 4). See
+[Nous-Concept.md](Nous-Concept.md) for the full plan.

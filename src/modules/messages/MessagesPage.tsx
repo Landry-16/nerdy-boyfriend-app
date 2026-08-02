@@ -13,10 +13,10 @@ export function MessagesPage() {
   if (error || !messages) return <ErrorMessage message="Impossible de charger les messages." />
 
   return (
-    <div className="animate-fade-in space-y-6">
+    <div className="animate-fade-in space-y-8">
       <header>
         <h1 className="text-2xl font-semibold text-ink">Historique des messages</h1>
-        <p className="text-sm text-ink/60">{messages.length} message(s) dans la collection.</p>
+        <p className="mt-1 text-sm text-ink/60">{messages.length} message(s) dans la collection.</p>
       </header>
 
       <ul className="space-y-3">

@@ -8,11 +8,11 @@ export function HomePage() {
   const { signOut } = useAuth()
 
   return (
-    <div className="animate-fade-in space-y-6">
+    <div className="animate-fade-in space-y-8">
       <header className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-ink">Nous 🫶</h1>
-          <p className="text-sm text-ink/60">{formatDateLong(new Date())}</p>
+          <p className="mt-1 text-sm text-ink/60">{formatDateLong(new Date())}</p>
         </div>
         <button
           type="button"

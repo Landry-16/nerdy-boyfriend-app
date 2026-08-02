@@ -19,10 +19,10 @@ export function MoodPage() {
   const todayMood = moods.find((entry) => entry.mood_date === todayIso)?.mood ?? null
 
   return (
-    <div className="animate-fade-in space-y-6">
+    <div className="animate-fade-in space-y-8">
       <header>
         <h1 className="text-2xl font-semibold text-ink">Humeur</h1>
-        <p className="text-sm text-ink/60">Comment te sens-tu aujourd'hui ?</p>
+        <p className="mt-1 text-sm text-ink/60">Comment te sens-tu aujourd'hui ?</p>
       </header>
 
       <Card>

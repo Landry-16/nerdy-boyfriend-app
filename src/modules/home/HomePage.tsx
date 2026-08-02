@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { DailyMessageCard } from '../messages/DailyMessageCard'
 import { CounterSummaryCard } from './CounterSummaryCard'
+import { QuickAccessGrid } from './QuickAccessGrid'
 import { formatDateLong } from '../../lib/date'
 
 export function HomePage() {
@@ -25,6 +26,7 @@ export function HomePage() {
 
       <DailyMessageCard />
       <CounterSummaryCard />
+      <QuickAccessGrid />
 
       <Link
         to="/mood"

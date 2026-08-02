@@ -35,7 +35,7 @@ export function MemoriesPage() {
     <div className="animate-fade-in space-y-8">
       <header className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-ink">Souvenirs 📸</h1>
+          <h1 className="text-2xl font-semibold text-ink">Souvenirs</h1>
           <p className="mt-1 text-sm text-ink/60">{memories.length} souvenir(s)</p>
         </div>
         <Link
@@ -132,7 +132,7 @@ function GalleryTile({ memory }: { memory: MemoryWithPhotos }) {
         {cover ? (
           <img src={getPhotoUrl(cover.storage_path)} alt="" className="h-full w-full object-cover" />
         ) : (
-          <div className="flex h-full w-full items-center justify-center text-3xl">📷</div>
+          <div className="flex h-full w-full items-center justify-center text-3xl">photo i guess</div>
         )}
       </div>
       <div className="p-3">
@@ -155,7 +155,7 @@ function TimelineRow({ memory }: { memory: MemoryWithPhotos }) {
         {cover ? (
           <img src={getPhotoUrl(cover.storage_path)} alt="" className="h-full w-full object-cover" />
         ) : (
-          <div className="flex h-full w-full items-center justify-center text-xl">📷</div>
+          <div className="flex h-full w-full items-center justify-center text-xl">photo i guess</div>
         )}
       </div>
       <div className="min-w-0">

@@ -72,13 +72,13 @@ export function MemoryDetailPage() {
           rel="noreferrer"
           className="block rounded-2xl bg-white/70 p-4 text-center text-sm text-ink/70 underline underline-offset-2"
         >
-          🎵 Ecouter la musique de ce souvenir
+          Ecouter la musique de ce souvenir
         </a>
       )}
 
       {hasLocation && (
         <Link to="/map" className="block rounded-2xl bg-white/70 p-4 text-center text-sm text-ink/70">
-          📍 Voir sur la carte
+          Voir sur la carte
         </Link>
       )}
 

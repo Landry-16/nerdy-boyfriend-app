@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { createEvent } from './counter.api'
 import { toIsoDate } from '../../lib/date'
+import { DateField } from '../../components/DateField'
 
 export function AddEventForm({ onSaved }: { onSaved: () => void }) {
   const [title, setTitle] = useState('')
@@ -21,7 +22,7 @@ export function AddEventForm({ onSaved }: { onSaved: () => void }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3 rounded-3xl bg-white/70 p-5">
+    <form onSubmit={handleSubmit} className="space-y-3 rounded-3xl bg-white/70 p-6">
       <p className="text-sm font-medium text-ink/70">Ajouter un evenement</p>
       <input
         type="text"
@@ -31,13 +32,7 @@ export function AddEventForm({ onSaved }: { onSaved: () => void }) {
         onChange={(event) => setTitle(event.target.value)}
         className="w-full rounded-2xl border border-beige bg-white px-4 py-3 text-ink outline-none focus:border-sage"
       />
-      <input
-        type="date"
-        required
-        value={date}
-        onChange={(event) => setDate(event.target.value)}
-        className="w-full rounded-2xl border border-beige bg-white px-4 py-3 text-ink outline-none focus:border-sage"
-      />
+      <DateField required value={date} onChange={(event) => setDate(event.target.value)} />
       <label className="flex items-center gap-2 text-sm text-ink/70">
         <input
           type="checkbox"

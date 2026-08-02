@@ -36,4 +36,10 @@
     background-color: var(--color-cream);
     color: var(--color-ink);
   }
+
+  /* appearance-none alone does not hide Chromium's own calendar icon on
+     date inputs, so DateField's custom icon would otherwise double up. */
+  input[type='date']::-webkit-calendar-picker-indicator {
+    display: none;
+  }
 }

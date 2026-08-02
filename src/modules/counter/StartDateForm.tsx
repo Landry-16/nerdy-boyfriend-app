@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { setRelationshipStartDate } from './counter.api'
 import { toIsoDate } from '../../lib/date'
+import { DateField } from '../../components/DateField'
 
 export function StartDateForm({
   initialDate,
@@ -28,13 +29,7 @@ export function StartDateForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-3 rounded-3xl bg-white/70 p-6">
       <p className="text-sm text-ink/70">Depuis quand etes-vous ensemble ?</p>
-      <input
-        type="date"
-        required
-        value={date}
-        onChange={(event) => setDate(event.target.value)}
-        className="w-full rounded-2xl border border-beige bg-white px-4 py-3 text-ink outline-none focus:border-sage"
-      />
+      <DateField required value={date} onChange={(event) => setDate(event.target.value)} />
       <div className="flex gap-3">
         {onCancel && (
           <button

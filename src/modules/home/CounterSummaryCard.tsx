@@ -18,7 +18,7 @@ export function CounterSummaryCard() {
   const next = findNextEvent(events)
 
   return (
-    <Link to="/counter">
+    <Link to="/counter" className="block">
       <Card className="flex items-center justify-between">
         <div>
           {settings ? (

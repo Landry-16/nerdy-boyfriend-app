@@ -121,7 +121,23 @@ guaranteeing full coverage before anything repeats.
 The app builds to static files (`npm run build` outputs to `dist/`), so it can
 be hosted on any static host that supports PWAs (Vercel, Netlify, Cloudflare
 Pages...). Set the same environment variables as in `.env.example` on the
-hosting platform.
+hosting platform. `vercel.json` rewrites every path to `index.html`, which
+client-side routes (React Router) need to work on deep links and refresh.
+
+### Vercel
+
+1. Push this repository to GitHub (already done if you are reading this from
+   the repo).
+2. On [vercel.com](https://vercel.com), sign in with GitHub, then
+   "Add New... > Project" and import this repository. Vercel auto-detects the
+   Vite framework preset (`npm run build`, output directory `dist`) with no
+   extra configuration needed.
+3. Before the first deploy, add the environment variables under
+   "Environment Variables": `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
+   Use the **anon/publishable** key from Supabase (Project Settings > API
+   Keys), never the secret key: the secret key must never reach the browser,
+   and Supabase itself rejects it client-side.
+4. Deploy. Every future push to `main` redeploys automatically.
 
 ## Roadmap
 

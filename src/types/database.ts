@@ -44,6 +44,26 @@ export type CoupleSettingsRow = {
   updated_at: string
 }
 
+export type MemoryRow = {
+  id: string
+  title: string
+  description: string | null
+  memory_date: string
+  location_name: string | null
+  latitude: number | null
+  longitude: number | null
+  music_url: string | null
+  created_at: string
+}
+
+export type MemoryPhotoRow = {
+  id: string
+  memory_id: string
+  storage_path: string
+  position: number
+  created_at: string
+}
+
 export type Database = {
   public: {
     Tables: {
@@ -69,6 +89,18 @@ export type Database = {
         Row: CoupleSettingsRow
         Insert: Omit<CoupleSettingsRow, 'updated_at'>
         Update: Partial<Omit<CoupleSettingsRow, 'id' | 'updated_at'>>
+        Relationships: []
+      }
+      memories: {
+        Row: MemoryRow
+        Insert: Omit<MemoryRow, 'id' | 'created_at'>
+        Update: Partial<Omit<MemoryRow, 'id' | 'created_at'>>
+        Relationships: []
+      }
+      memory_photos: {
+        Row: MemoryPhotoRow
+        Insert: Omit<MemoryPhotoRow, 'id' | 'created_at'>
+        Update: Partial<Omit<MemoryPhotoRow, 'id' | 'created_at'>>
         Relationships: []
       }
     }

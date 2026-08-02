@@ -28,7 +28,7 @@ export function StartDateForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3 rounded-3xl bg-white/70 p-6">
-      <p className="text-sm text-ink/70">Depuis quand etes-vous ensemble ?</p>
+      <p className="text-sm text-ink/70">Depuis quand sommes nous ensemble ?</p>
       <DateField required value={date} onChange={(event) => setDate(event.target.value)} />
       <div className="flex gap-3">
         {onCancel && (

@@ -30,7 +30,7 @@ export function HomePage() {
         to="/mood"
         className="block rounded-3xl bg-white/70 p-5 text-center text-sm text-ink/70 shadow-sm transition-transform hover:scale-[1.01]"
       >
-        Comment te sens-tu aujourd'hui ?
+        Comment tu te sens aujourd'hui ?
       </Link>
     </div>
   )

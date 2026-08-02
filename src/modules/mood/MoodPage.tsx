@@ -22,7 +22,7 @@ export function MoodPage() {
     <div className="animate-fade-in space-y-8">
       <header>
         <h1 className="text-2xl font-semibold text-ink">Humeur</h1>
-        <p className="mt-1 text-sm text-ink/60">Comment te sens-tu aujourd'hui ?</p>
+        <p className="mt-1 text-sm text-ink/60">Comment tu te sens aujourd'hui ?</p>
       </header>
 
       <Card>

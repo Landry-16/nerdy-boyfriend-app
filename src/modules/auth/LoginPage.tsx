@@ -26,7 +26,7 @@ export function LoginPage() {
     <main className="flex min-h-svh items-center justify-center bg-cream px-6">
       <form onSubmit={handleSubmit} className="w-full max-w-sm animate-fade-in space-y-5 text-center">
         <h1 className="text-3xl font-semibold text-ink">Nous 🫶</h1>
-        <p className="text-sm text-ink/70">Notre espace personnel partage.</p>
+        <p className="text-sm text-ink/70">Cute ahh application</p>
 
         <div className="space-y-3 text-left">
           <label className="block text-sm font-medium text-ink" htmlFor="email">

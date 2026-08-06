@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './modules/auth/AuthContext'
-import { RequireAuth } from './modules/auth/RequireAuth'
+import { AuthGate } from './modules/auth/AuthGate'
 import { AppLayout } from './components/AppLayout'
 import { HomePage } from './modules/home/HomePage'
 import { MessagesPage } from './modules/messages/MessagesPage'
@@ -15,7 +15,7 @@ export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <RequireAuth>
+        <AuthGate>
           <AppLayout>
             <Routes>
               <Route path="/" element={<HomePage />} />
@@ -28,7 +28,7 @@ export default function App() {
               <Route path="/map" element={<MapPage />} />
             </Routes>
           </AppLayout>
-        </RequireAuth>
+        </AuthGate>
       </BrowserRouter>
     </AuthProvider>
   )

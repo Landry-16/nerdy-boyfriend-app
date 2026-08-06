@@ -6,7 +6,10 @@ concept lives in [Nous-Concept.md](Nous-Concept.md).
 
 This repository implements Phase 1 (home dashboard, message of the day, day
 counter, mood tracking, navigation) and part of Phase 2 of the roadmap:
-memories (souvenirs) and the map. The garden is not built yet.
+memories (souvenirs) and the map. The garden is not built yet. It also
+implements individual accounts that pair up into a couple (see
+"Authentication and pairing" below), replacing the original single
+shared-login model.
 
 ## Stack
 
@@ -32,6 +35,7 @@ src/
     counter/
     memories/
     map/
+    pairing/
   types/           shared TypeScript types, including the Supabase schema
 
 supabase/
@@ -60,11 +64,18 @@ npx supabase db push --db-url <your-connection-string>
 ```
 
 Or paste the contents of each file under `supabase/migrations/`, in order
-(`0001_init.sql`, then `0002_memories.sql`), and optionally `supabase/seed.sql`,
-into the Supabase SQL editor.
+(`0001_init.sql`, `0002_memories.sql`, `0003_couples.sql`), and optionally
+`supabase/seed.sql`, into the Supabase SQL editor.
 
-Create one Supabase Auth user (email and password) for the couple to share
-(see "Authentication" below).
+No manual account setup needed: each person creates their own account from
+the app's sign-up screen (see "Authentication" below).
+
+**Local development without a hosted project:** `npx supabase start` runs
+the full stack (Postgres, Auth, Storage) in Docker and applies every
+migration and the seed automatically. Point `.env` at the printed API URL
+and `publishable`/`anon` key instead of a hosted project's. Useful for
+trying out schema changes without touching real data. `npx supabase stop`
+shuts it down.
 
 ### 3. Configure environment variables
 
@@ -91,33 +102,62 @@ npm run dev
 | `npm run lint` | Run oxlint |
 | `npm run generate-icons` | Regenerate PWA icons from `scripts/icon-source.svg` |
 
-## Authentication
+## Authentication and pairing
 
-The app uses a single shared Supabase Auth account for the couple rather than
-per-person accounts. This keeps the MVP simple: no invite flow, no account
-linking. Both partners log in with the same email and password. Per-person
-accounts are listed as a possible future improvement once the app needs to
-distinguish who did what.
+Each person has their own Supabase Auth account. Two accounts pair up into a
+**couple** using a short invite code:
+
+1. The first person signs up and creates a couple (`create_couple()`), which
+   generates a 6-character invite code.
+2. They share that code with their partner (text, call, however).
+3. The partner signs up and enters the code (`join_couple_by_code(code)`) to
+   join.
+
+Both functions live in `0003_couples.sql`, run with elevated privileges
+(`security definer`), and enforce the two business rules that matter here —
+you can only be in one couple, and a couple has at most 2 members — entirely
+server-side, so a buggy or malicious client cannot bypass them. Until both
+people have joined, the app shows a waiting screen with the invite code
+(`src/modules/pairing/`).
+
+**Data isolation:** every table is scoped to `couple_id`, and every Row Level
+Security policy filters on it (`couple_id = public.current_couple_id()`).
+This is the reason the pairing model exists in the schema at all: with
+multiple couples now sharing the same Supabase project, RLS has to keep them
+from seeing each other's data, not just gate on "signed in". `created_by`
+columns record who did what within a couple (not used for access control),
+laying groundwork for attribution in future features (messaging,
+personalized popups).
+
+If you have existing data from before this change (single shared login), the
+migration attaches it to a "legacy" couple; whoever signs up and creates a
+couple first should be the person who then re-enters the relevant details
+(or you can manually update that legacy couple's row to point at the new
+couple in the SQL editor).
 
 ## Data model
 
 See `supabase/migrations/` for the source of truth. Summary:
 
+- `couples`: one row per couple, holding the invite code
+- `profiles`: one row per user (auto-created on signup via a trigger),
+  linking to a couple once paired
 - `messages`: the pool of daily messages (compliments, memories, quotes,
   jokes, encouragements, declarations)
-- `moods`: one mood entry per calendar day
+- `moods`: one mood entry per calendar day, per couple
 - `events`: important dates, optionally recurring yearly
-- `couple_settings`: a single row holding the relationship start date used by
-  the day counter
+- `couple_settings`: one row per couple, holding the relationship start date
+  used by the day counter
 - `memories`: souvenirs (title, date, description, optional location name and
   coordinates, optional music link)
 - `memory_photos`: one or more photos per memory, stored in the
   `memory-photos` Supabase Storage bucket (public, but paths are random
-  UUIDs, so effectively unguessable; the app itself still sits behind the
-  shared login)
+  UUIDs, so effectively unguessable; upload/delete is still restricted to the
+  owning couple)
 
-Row Level Security is enabled on every table, restricted to authenticated
-requests (see "Authentication" above for what that means in practice).
+`couple_id` and `created_by` are stamped automatically on insert via column
+defaults (`public.current_couple_id()` and `auth.uid()`), so application code
+never sets them explicitly.
 
 ### Map
 

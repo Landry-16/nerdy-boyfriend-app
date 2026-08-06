@@ -4,7 +4,7 @@ import type { MemoryPhotoRow, MemoryRow } from '../../types/database'
 const PHOTO_BUCKET = 'memory-photos'
 
 export type MemoryWithPhotos = MemoryRow & { photos: MemoryPhotoRow[] }
-export type NewMemoryInput = Omit<MemoryRow, 'id' | 'created_at'>
+export type NewMemoryInput = Omit<MemoryRow, 'id' | 'created_at' | 'couple_id' | 'created_by'>
 
 export function getPhotoUrl(storagePath: string): string {
   return supabase.storage.from(PHOTO_BUCKET).getPublicUrl(storagePath).data.publicUrl

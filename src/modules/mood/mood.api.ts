@@ -13,11 +13,11 @@ export async function fetchMoods(limit = 60): Promise<MoodRow[]> {
   return data
 }
 
-/** Creates or replaces today's mood entry. One entry per calendar day. */
+/** Creates or replaces today's mood entry. One entry per calendar day, per couple. */
 export async function setMoodForDate(date: Date, mood: Mood, note?: string): Promise<MoodRow> {
   const { data, error } = await supabase
     .from('moods')
-    .upsert({ mood_date: toIsoDate(date), mood, note: note ?? null }, { onConflict: 'mood_date' })
+    .upsert({ mood_date: toIsoDate(date), mood, note: note ?? null }, { onConflict: 'couple_id,mood_date' })
     .select()
     .single()
 

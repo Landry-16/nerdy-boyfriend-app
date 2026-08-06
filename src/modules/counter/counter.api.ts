@@ -11,7 +11,7 @@ export async function fetchCoupleSettings(): Promise<CoupleSettingsRow | null> {
 export async function setRelationshipStartDate(isoDate: string): Promise<CoupleSettingsRow> {
   const { data, error } = await supabase
     .from('couple_settings')
-    .upsert({ id: true, relationship_start_date: isoDate }, { onConflict: 'id' })
+    .upsert({ relationship_start_date: isoDate }, { onConflict: 'couple_id' })
     .select()
     .single()
 

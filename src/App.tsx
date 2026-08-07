@@ -11,6 +11,7 @@ import { NewMemoryPage } from './modules/memories/NewMemoryPage'
 import { MemoryDetailPage } from './modules/memories/MemoryDetailPage'
 import { MapPage } from './modules/map/MapPage'
 import { NoteComposerPage } from './modules/notes/NoteComposerPage'
+import { RoomPage } from './modules/room/RoomPage'
 
 export default function App() {
   return (
@@ -28,6 +29,7 @@ export default function App() {
               <Route path="/memories/:id" element={<MemoryDetailPage />} />
               <Route path="/map" element={<MapPage />} />
               <Route path="/notes/new" element={<NoteComposerPage />} />
+              <Route path="/room" element={<RoomPage />} />
             </Routes>
           </AppLayout>
         </AuthGate>

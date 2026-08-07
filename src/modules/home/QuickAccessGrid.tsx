@@ -7,6 +7,7 @@ const quickLinks = [
   { to: '/memories', label: 'Souvenirs', icon: CameraIcon, bg: 'bg-pink' },
   { to: '/map', label: 'Carte', icon: MapIcon, bg: 'bg-sky' },
   { to: '/notes/new', label: 'Petit mot', icon: NoteIcon, bg: 'bg-lavender' },
+  { to: '/room', label: 'Room', icon: ScreenIcon, bg: 'bg-beige' },
 ]
 
 export function QuickAccessGrid() {
@@ -60,6 +61,15 @@ function NoteIcon() {
       />
       <path d="M14 4v5h5" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M8.5 13h7M8.5 16.5h4.5" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function ScreenIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <rect x="3" y="4" width="18" height="12" rx="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M9 20h6M12 16v4" strokeLinecap="round" />
     </svg>
   )
 }

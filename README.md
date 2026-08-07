@@ -36,6 +36,7 @@ src/
     memories/
     map/
     pairing/
+    notes/
   types/           shared TypeScript types, including the Supabase schema
 
 supabase/
@@ -64,8 +65,8 @@ npx supabase db push --db-url <your-connection-string>
 ```
 
 Or paste the contents of each file under `supabase/migrations/`, in order
-(`0001_init.sql`, `0002_memories.sql`, `0003_couples.sql`), and optionally
-`supabase/seed.sql`, into the Supabase SQL editor.
+(`0001_init.sql`, `0002_memories.sql`, `0003_couples.sql`, `0004_notes.sql`),
+and optionally `supabase/seed.sql`, into the Supabase SQL editor.
 
 No manual account setup needed: each person creates their own account from
 the app's sign-up screen (see "Authentication" below).
@@ -154,10 +155,24 @@ See `supabase/migrations/` for the source of truth. Summary:
   `memory-photos` Supabase Storage bucket (public, but paths are random
   UUIDs, so effectively unguessable; upload/delete is still restricted to the
   owning couple)
+- `notes`: a text message or a small drawing one partner leaves for the
+  other; `content` is plain text for `kind = 'text'`, or a PNG data URL for
+  `kind = 'drawing'` (small enough that a Storage bucket would be overkill)
 
 `couple_id` and `created_by` are stamped automatically on insert via column
 defaults (`public.current_couple_id()` and `auth.uid()`), so application code
 never sets them explicitly.
+
+### Partner notes
+
+Either partner can leave a short message or doodle
+(`src/modules/notes/NoteComposerPage.tsx`, reachable from the home screen's
+quick-access grid). It shows up as a card on the *other* person's home
+screen (`PartnerNoteCard.tsx`) the next time they open the app, and stays
+there until they dismiss it (`seen_at` gets set). A person never sees their
+own note as "from partner" - the query excludes rows where `created_by`
+matches the viewer. This is the first feature built on top of the
+`created_by` attribution columns added for the couples migration.
 
 ### Map
 
@@ -208,6 +223,7 @@ client-side routes (React Router) need to work on deep links and refresh.
 ## Roadmap
 
 Phase 1: home, message of the day, counter, mood, navigation. Phase 2
-(partial, this branch): memories gallery and map. Not yet built: the garden,
-the food picker, and further polish (Phases 2 remainder, 3, 4). See
-[Nous-Concept.md](Nous-Concept.md) for the full plan.
+(partial): memories gallery and map. Beyond the original concept: individual
+accounts + couple pairing, and partner notes/doodles (this branch). Not yet
+built: the garden, the food picker, and further polish (Phases 2 remainder,
+3, 4). See [Nous-Concept.md](Nous-Concept.md) for the full original plan.

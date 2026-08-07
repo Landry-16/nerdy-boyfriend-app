@@ -86,6 +86,14 @@ export type MemoryPhotoRow = {
   created_at: string
 }
 
+export type BrowseRoomRow = {
+  id: string
+  couple_id: string
+  current_url: string | null
+  updated_by: string | null
+  updated_at: string
+}
+
 // couple_id and created_by are stamped server-side via column defaults
 // (public.current_couple_id() / auth.uid(), see 0003_couples.sql), so
 // callers never need to supply them on insert.
@@ -144,6 +152,13 @@ export type Database = {
         Row: MemoryPhotoRow
         Insert: Omit<MemoryPhotoRow, 'id' | 'created_at'>
         Update: Partial<Omit<MemoryPhotoRow, 'id' | 'created_at'>>
+        Relationships: []
+      }
+      browse_room: {
+        Row: BrowseRoomRow
+        Insert: Omit<BrowseRoomRow, 'id' | 'updated_at' | 'couple_id' | 'updated_by'> &
+          Partial<Pick<BrowseRoomRow, 'couple_id' | 'updated_by'>>
+        Update: Partial<Omit<BrowseRoomRow, 'id' | 'updated_at'>>
         Relationships: []
       }
     }

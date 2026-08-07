@@ -4,25 +4,47 @@ import { Link } from 'react-router-dom'
 // mood, and the counter, which have their own cards) get a small cute tile
 // here instead. New modules join this list as they ship.
 const quickLinks = [
-  { to: '/memories', label: 'Souvenirs', emoji: '📸', bg: 'bg-pink' },
-  { to: '/map', label: 'Carte', emoji: '🗺️', bg: 'bg-sky' },
+  { to: '/memories', label: 'Souvenirs', icon: CameraIcon, bg: 'bg-pink' },
+  { to: '/map', label: 'Carte', icon: MapIcon, bg: 'bg-sky' },
 ]
 
 export function QuickAccessGrid() {
   return (
     <div className="grid grid-cols-3 gap-3">
-      {quickLinks.map((link) => (
+      {quickLinks.map(({ to, label, icon: Icon, bg }) => (
         <Link
-          key={link.to}
-          to={link.to}
+          key={to}
+          to={to}
           className="flex flex-col items-center gap-2 rounded-3xl bg-white/70 py-4 shadow-sm transition-transform hover:scale-[1.03]"
         >
-          <span className={`flex h-12 w-12 items-center justify-center rounded-full text-xl ${link.bg}`}>
-            {link.emoji}
+          <span className={`flex h-12 w-12 items-center justify-center rounded-full text-ink/70 ${bg}`}>
+            <Icon />
           </span>
-          <span className="text-xs font-medium text-ink/70">{link.label}</span>
+          <span className="text-xs font-medium text-ink/70">{label}</span>
         </Link>
       ))}
     </div>
+  )
+}
+
+function CameraIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path
+        d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle cx="12" cy="13" r="3.5" />
+    </svg>
+  )
+}
+
+function MapIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path d="m3 6 6-2 6 2 6-2v14l-6 2-6-2-6 2Z" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M9 4v14M15 6v14" strokeLinecap="round" />
+    </svg>
   )
 }

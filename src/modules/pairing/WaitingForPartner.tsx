@@ -22,7 +22,7 @@ export function WaitingForPartner({ inviteCode, onCheckAgain }: { inviteCode: st
     <main className="flex min-h-svh items-center justify-center bg-cream px-6">
       <div className="w-full max-w-sm animate-fade-in space-y-6 text-center">
         <div>
-          <h1 className="text-2xl font-semibold text-ink">En attente de ton/ta partenaire 💌</h1>
+          <h1 className="text-2xl font-semibold text-ink">En attente de ton/ta partenaire</h1>
           <p className="mt-1 text-sm text-ink/60">Partage ce code pour qu'iel puisse te rejoindre.</p>
         </div>
 

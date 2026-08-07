@@ -46,7 +46,7 @@ export function CreateOrJoinCouple() {
     <main className="flex min-h-svh items-center justify-center bg-cream px-6">
       <div className="w-full max-w-sm animate-fade-in space-y-6 text-center">
         <div>
-          <h1 className="text-2xl font-semibold text-ink">Presque pret 🫶</h1>
+          <h1 className="text-2xl font-semibold text-ink">Presque pret</h1>
           <p className="mt-1 text-sm text-ink/60">Cree votre couple ou rejoins celui de ton/ta partenaire.</p>
         </div>
 

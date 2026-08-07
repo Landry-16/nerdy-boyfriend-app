@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom'
 const quickLinks = [
   { to: '/memories', label: 'Souvenirs', icon: CameraIcon, bg: 'bg-pink' },
   { to: '/map', label: 'Carte', icon: MapIcon, bg: 'bg-sky' },
+  { to: '/notes/new', label: 'Petit mot', icon: NoteIcon, bg: 'bg-lavender' },
 ]
 
 export function QuickAccessGrid() {
@@ -45,6 +46,20 @@ function MapIcon() {
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
       <path d="m3 6 6-2 6 2 6-2v14l-6 2-6-2-6 2Z" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M9 4v14M15 6v14" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function NoteIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path
+        d="M14 4H6a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9Z"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path d="M14 4v5h5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M8.5 13h7M8.5 16.5h4.5" strokeLinecap="round" />
     </svg>
   )
 }

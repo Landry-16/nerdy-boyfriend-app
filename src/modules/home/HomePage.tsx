@@ -3,6 +3,7 @@ import { useAuth } from '../auth/AuthContext'
 import { DailyMessageCard } from '../messages/DailyMessageCard'
 import { CounterSummaryCard } from './CounterSummaryCard'
 import { QuickAccessGrid } from './QuickAccessGrid'
+import { PartnerNoteCard } from '../notes/PartnerNoteCard'
 import { formatDateLong } from '../../lib/date'
 
 export function HomePage() {
@@ -24,6 +25,7 @@ export function HomePage() {
         </button>
       </header>
 
+      <PartnerNoteCard />
       <DailyMessageCard />
       <CounterSummaryCard />
       <QuickAccessGrid />

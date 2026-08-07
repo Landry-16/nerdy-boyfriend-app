@@ -36,6 +36,7 @@ src/
     memories/
     map/
     pairing/
+    room/
   types/           shared TypeScript types, including the Supabase schema
 
 supabase/
@@ -64,8 +65,8 @@ npx supabase db push --db-url <your-connection-string>
 ```
 
 Or paste the contents of each file under `supabase/migrations/`, in order
-(`0001_init.sql`, `0002_memories.sql`, `0003_couples.sql`), and optionally
-`supabase/seed.sql`, into the Supabase SQL editor.
+(`0001_init.sql`, `0002_memories.sql`, `0003_couples.sql`, `0005_room.sql`),
+and optionally `supabase/seed.sql`, into the Supabase SQL editor.
 
 No manual account setup needed: each person creates their own account from
 the app's sign-up screen (see "Authentication" below).
@@ -154,10 +155,38 @@ See `supabase/migrations/` for the source of truth. Summary:
   `memory-photos` Supabase Storage bucket (public, but paths are random
   UUIDs, so effectively unguessable; upload/delete is still restricted to the
   owning couple)
+- `browse_room`: one row per couple, holding the URL currently shown in the
+  shared browsing room
 
 `couple_id` and `created_by` are stamped automatically on insert via column
 defaults (`public.current_couple_id()` and `auth.uid()`), so application code
 never sets them explicitly.
+
+### Shared room
+
+`/room` (`src/modules/room/`) is a single page both partners can point at the
+same URL, kept in sync live via Supabase Realtime (`postgres_changes` on
+`browse_room`, added to the `supabase_realtime` publication in
+`0005_room.sql`) rather than polling. Either partner can navigate; there is
+no lock or turn order.
+
+This is a **best-effort** feature, worth understanding before relying on it:
+the page is displayed in an iframe, and most sites - every video streaming
+platform in particular (YouTube, Crunchyroll, Netflix...) - explicitly
+refuse to be framed via `X-Frame-Options` or a `frame-ancestors` Content
+Security Policy. This is enforced by the browser itself; page JavaScript has
+no reliable way to detect it (no `onerror` fires for a framing refusal, the
+frame just renders blank or shows the browser's own refusal page), so the
+app does not try to. Instead it always shows an "open in a new tab" link
+next to the iframe as the fallback. General websites without such
+restrictions (many blogs, wikis, smaller sites) work fine embedded.
+
+`normalizeUrl` (`src/modules/room/normalizeUrl.ts`) only accepts input with
+no scheme (prefixed with `https://`) or an explicit `http(s)://` scheme;
+anything else (`javascript:`, `ftp:`, `mailto:`...) is rejected rather than
+coerced, since blindly prepending `https://` to a non-http(s) scheme
+produces a malformed-but-parseable URL instead of the rejection that input
+deserves.
 
 ### Map
 
@@ -208,6 +237,7 @@ client-side routes (React Router) need to work on deep links and refresh.
 ## Roadmap
 
 Phase 1: home, message of the day, counter, mood, navigation. Phase 2
-(partial, this branch): memories gallery and map. Not yet built: the garden,
-the food picker, and further polish (Phases 2 remainder, 3, 4). See
-[Nous-Concept.md](Nous-Concept.md) for the full plan.
+(partial): memories gallery and map. Beyond the original concept: individual
+accounts + couple pairing, and a shared browsing room (this branch). Not yet
+built: the garden, the food picker, and further polish (Phases 2 remainder,
+3, 4). See [Nous-Concept.md](Nous-Concept.md) for the full original plan.

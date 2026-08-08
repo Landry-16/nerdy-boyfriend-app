@@ -54,6 +54,8 @@ export type EventRow = {
   is_recurring: boolean
   couple_id: string
   created_by: string | null
+  notified_approaching_at: string | null
+  notified_today_at: string | null
   created_at: string
 }
 
@@ -106,6 +108,16 @@ export type BrowseRoomRow = {
   updated_at: string
 }
 
+export type PushSubscriptionRow = {
+  id: string
+  user_id: string
+  couple_id: string
+  endpoint: string
+  p256dh_key: string
+  auth_key: string
+  created_at: string
+}
+
 // couple_id and created_by are stamped server-side via column defaults
 // (public.current_couple_id() / auth.uid(), see 0003_couples.sql), so
 // callers never need to supply them on insert.
@@ -144,7 +156,7 @@ export type Database = {
       }
       events: {
         Row: EventRow
-        Insert: InsertOf<EventRow, 'couple_id' | 'created_by'>
+        Insert: InsertOf<EventRow, 'couple_id' | 'created_by' | 'notified_approaching_at' | 'notified_today_at'>
         Update: Partial<Omit<EventRow, 'id' | 'created_at'>>
         Relationships: []
       }
@@ -177,6 +189,12 @@ export type Database = {
         Insert: Omit<BrowseRoomRow, 'id' | 'updated_at' | 'couple_id' | 'updated_by'> &
           Partial<Pick<BrowseRoomRow, 'couple_id' | 'updated_by'>>
         Update: Partial<Omit<BrowseRoomRow, 'id' | 'updated_at'>>
+        Relationships: []
+      }
+      push_subscriptions: {
+        Row: PushSubscriptionRow
+        Insert: InsertOf<PushSubscriptionRow, 'user_id' | 'couple_id'>
+        Update: Partial<Omit<PushSubscriptionRow, 'id' | 'created_at'>>
         Relationships: []
       }
     }

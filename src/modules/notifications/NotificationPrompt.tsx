@@ -37,8 +37,8 @@ export function NotificationPrompt() {
   return (
     <Card className="animate-fade-in space-y-3 text-center">
       <p className="text-sm text-ink/70">
-        Active les notifications pour savoir quand elle t'ecrit un petit mot, ajoute un souvenir, ou qu'un evenement
-        approche.
+        Active les notifications pour savoir quand elle décide de te déranger,
+        ou quand un evenement que t'auras clairement oublié approche.
       </p>
       {error && <p className="text-sm text-red-500">{error}</p>}
       <div className="flex gap-2">

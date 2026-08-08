@@ -38,10 +38,13 @@ src/
     pairing/
     notes/
     room/
+    notifications/
+  sw.ts            custom service worker (push notifications)
   types/           shared TypeScript types, including the Supabase schema
 
 supabase/
   migrations/      SQL migrations, applied in order
+  functions/       Edge Functions (Deno), deployed separately from the app
   seed.sql         example seed data
 ```
 
@@ -66,7 +69,7 @@ npx supabase db push --db-url <your-connection-string>
 ```
 
 Or paste the contents of each file under `supabase/migrations/`, in order
-(`0001_init.sql` through `0006_backfill_profiles.sql`), and optionally
+(`0001_init.sql` through `0007_push_notifications.sql`), and optionally
 `supabase/seed.sql`, into the Supabase SQL editor.
 
 No manual account setup needed: each person creates their own account from
@@ -163,6 +166,11 @@ See `supabase/migrations/` for the source of truth. Summary:
   `kind = 'drawing'` (small enough that a Storage bucket would be overkill)
 - `browse_room`: one row per couple, holding the URL currently shown in the
   shared browsing room
+- `push_subscriptions`: one row per device with push notifications enabled
+  (endpoint and encryption keys for the Web Push protocol)
+
+`events` additionally has `notified_approaching_at` / `notified_today_at`,
+used only to avoid double-sending push reminders (see "Push notifications").
 
 `couple_id` and `created_by` are stamped automatically on insert via column
 defaults (`public.current_couple_id()` and `auth.uid()`), so application code
@@ -228,6 +236,86 @@ Days are grouped into cycles the length of the message pool; each cycle is an
 independent seeded shuffle, so the order changes cycle to cycle while still
 guaranteeing full coverage before anything repeats.
 
+### Push notifications
+
+Real OS-level push notifications - the kind that reach a phone even when the
+app is closed - fire for five triggers: a partner sends a note, adds a
+memory, adds an event, an event is `APPROACHING_DAYS` (7) away, and an event
+is today. This needs more than the frontend: nothing running only in the
+browser tab can wake up days later to check whether an event is approaching.
+
+**Pieces involved:**
+
+- `push_subscriptions` table (`0007_push_notifications.sql`): one row per
+  device a user has enabled notifications on. RLS only lets a user read/write
+  their *own* rows - their partner's raw push endpoint and keys are not
+  couple data - so sending to the partner always goes through the service
+  role key in an Edge Function, never the client directly.
+- `src/sw.ts`: a hand-written service worker (the PWA plugin runs in
+  `injectManifest` mode instead of its default `generateSW` specifically to
+  allow this) with `push` and `notificationclick` handlers.
+- `src/modules/notifications/`: requests permission, subscribes, and saves
+  the subscription. `NotificationPrompt` on the home screen is the entry
+  point; it only shows when supported and not already granted/dismissed
+  (dismissal is remembered in `localStorage`).
+- `supabase/functions/send-push`: called directly by the client right after
+  it creates a note, memory, or event (`src/lib/notify.ts`, fire-and-forget -
+  a failed push must never block the action that triggered it). Resolves the
+  caller's `couple_id` from their own JWT server-side rather than trusting a
+  client-supplied value, so a client cannot ask it to notify a couple it
+  does not belong to.
+- `supabase/functions/check-event-reminders`: scheduled once a day (not
+  client-triggered) via `pg_cron`. Checks every event across every couple for
+  the "approaching" and "today" triggers, using `notified_approaching_at` /
+  `notified_today_at` to avoid double-sending - compared against *today's
+  date only*, so a recurring event correctly notifies again next year with
+  no extra reset logic.
+
+**Setup, after applying `0007_push_notifications.sql`:**
+
+1. Generate a VAPID key pair (skip if you already have one):
+   ```bash
+   npx web-push generate-vapid-keys
+   ```
+2. Client: set `VITE_VAPID_PUBLIC_KEY` to the public key in `.env` (local)
+   and in your hosting platform's environment variables (see "Vercel" below).
+3. Deploy the two Edge Functions:
+   ```bash
+   npx supabase functions deploy send-push
+   npx supabase functions deploy check-event-reminders
+   ```
+4. Set their secrets (private key never goes in any committed file or the
+   client env):
+   ```bash
+   npx supabase secrets set VAPID_PUBLIC_KEY=<public key>
+   npx supabase secrets set VAPID_PRIVATE_KEY=<private key>
+   npx supabase secrets set VAPID_SUBJECT=mailto:you@example.com
+   npx supabase secrets set CRON_SECRET=<any random string>
+   ```
+5. Schedule the daily check in the Supabase SQL editor (`pg_cron` and
+   `pg_net` are enabled by default on hosted projects; `<project-ref>` is in
+   your project's URL, the service role key is under Project Settings > API):
+   ```sql
+   select cron.schedule(
+     'daily-event-reminders',
+     '0 8 * * *', -- 08:00 UTC daily; adjust to taste
+     $$
+     select net.http_post(
+       url := 'https://<project-ref>.supabase.co/functions/v1/check-event-reminders',
+       headers := jsonb_build_object(
+         'Authorization', 'Bearer <service role key>',
+         'x-cron-secret', '<the CRON_SECRET you set above>'
+       )
+     )
+     $$
+   );
+   ```
+
+Without this setup the app still works; `NotificationPrompt` simply fails
+silently to subscribe (no `VITE_VAPID_PUBLIC_KEY`), and `notifyPartner()`
+calls fail silently too (no deployed `send-push` function) - by design, per
+the "must never block the action that triggered it" rule above.
+
 ## Deploying
 
 The app builds to static files (`npm run build` outputs to `dist/`), so it can
@@ -245,7 +333,8 @@ client-side routes (React Router) need to work on deep links and refresh.
    Vite framework preset (`npm run build`, output directory `dist`) with no
    extra configuration needed.
 3. Before the first deploy, add the environment variables under
-   "Environment Variables": `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
+   "Environment Variables": `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`,
+   and `VITE_VAPID_PUBLIC_KEY` (see "Push notifications" for that last one).
    Use the **anon/publishable** key from Supabase (Project Settings > API
    Keys), never the secret key: the secret key must never reach the browser,
    and Supabase itself rejects it client-side.
@@ -255,7 +344,7 @@ client-side routes (React Router) need to work on deep links and refresh.
 
 Phase 1: home, message of the day, counter, mood, navigation. Phase 2
 (partial): memories gallery and map. Beyond the original concept: individual
-accounts + couple pairing, partner notes/doodles, and a shared browsing room.
-Not yet built: the garden, the food picker, and further polish (Phases 2
-remainder, 3, 4). See [Nous-Concept.md](Nous-Concept.md) for the full
-original plan.
+accounts + couple pairing, partner notes/doodles, a shared browsing room, and
+push notifications. Not yet built: the garden, the food picker, and further
+polish (Phases 2 remainder, 3, 4). See [Nous-Concept.md](Nous-Concept.md) for
+the full original plan.

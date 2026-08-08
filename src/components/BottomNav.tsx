@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom'
 
 const navItems = [
   { to: '/', label: 'Accueil', icon: HomeIcon },
-  { to: '/messages', label: 'Messages', icon: MessageIcon },
+  { to: '/notes/new', label: 'Petit mot', icon: NoteIcon },
   { to: '/mood', label: 'Humeur', icon: MoodIcon },
   { to: '/counter', label: 'Compteur', icon: CounterIcon },
 ]
@@ -41,14 +41,16 @@ function HomeIcon() {
   )
 }
 
-function MessageIcon() {
+function NoteIcon() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
       <path
-        d="M4 6h16v10H8l-4 4V6Z"
+        d="M14 4H6a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9Z"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
+      <path d="M14 4v5h5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M8.5 13h7M8.5 16.5h4.5" strokeLinecap="round" />
     </svg>
   )
 }

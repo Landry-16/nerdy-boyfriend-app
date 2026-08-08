@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom'
 import { useCallback } from 'react'
 import { useAsync } from '../../lib/useAsync'
 import { fetchMessages } from './messages.api'
@@ -35,9 +34,6 @@ export function DailyMessageCard() {
         {messageTypeLabels[message.type]}
       </span>
       <p className="mt-2 text-lg leading-relaxed text-ink">{message.text}</p>
-      <Link to="/messages" className="mt-3 inline-block text-xs text-ink/50 underline underline-offset-2">
-        Voir l'historique
-      </Link>
     </Card>
   )
 }

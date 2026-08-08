@@ -3,7 +3,6 @@ import { AuthProvider } from './modules/auth/AuthContext'
 import { AuthGate } from './modules/auth/AuthGate'
 import { AppLayout } from './components/AppLayout'
 import { HomePage } from './modules/home/HomePage'
-import { MessagesPage } from './modules/messages/MessagesPage'
 import { MoodPage } from './modules/mood/MoodPage'
 import { CounterPage } from './modules/counter/CounterPage'
 import { MemoriesPage } from './modules/memories/MemoriesPage'
@@ -21,7 +20,6 @@ export default function App() {
           <AppLayout>
             <Routes>
               <Route path="/" element={<HomePage />} />
-              <Route path="/messages" element={<MessagesPage />} />
               <Route path="/mood" element={<MoodPage />} />
               <Route path="/counter" element={<CounterPage />} />
               <Route path="/memories" element={<MemoriesPage />} />

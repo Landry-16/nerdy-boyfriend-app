@@ -66,9 +66,8 @@ npx supabase db push --db-url <your-connection-string>
 ```
 
 Or paste the contents of each file under `supabase/migrations/`, in order
-(`0001_init.sql`, `0002_memories.sql`, `0003_couples.sql`, `0004_notes.sql`,
-`0005_room.sql`), and optionally `supabase/seed.sql`, into the Supabase SQL
-editor.
+(`0001_init.sql` through `0006_backfill_profiles.sql`), and optionally
+`supabase/seed.sql`, into the Supabase SQL editor.
 
 No manual account setup needed: each person creates their own account from
 the app's sign-up screen (see "Authentication" below).
@@ -133,10 +132,12 @@ laying groundwork for attribution in future features (messaging,
 personalized popups).
 
 If you have existing data from before this change (single shared login), the
-migration attaches it to a "legacy" couple; whoever signs up and creates a
-couple first should be the person who then re-enters the relevant details
-(or you can manually update that legacy couple's row to point at the new
-couple in the SQL editor).
+migration attaches it to a "legacy" couple, and `0006_backfill_profiles.sql`
+links the original shared-login account's profile straight to it (that
+account predates individual accounts entirely, so it can only be the
+original one). Logging into it after migrating shows the invite code for
+that legacy couple - share it with your partner and have them sign up and
+join with it, and both of you keep the existing history.
 
 ## Data model
 
@@ -170,8 +171,8 @@ never sets them explicitly.
 ### Partner notes
 
 Either partner can leave a short message or doodle
-(`src/modules/notes/NoteComposerPage.tsx`, reachable from the home screen's
-quick-access grid). It shows up as a card on the *other* person's home
+(`src/modules/notes/NoteComposerPage.tsx`, reachable from the bottom nav's
+"Petit mot" tab). It shows up as a card on the *other* person's home
 screen (`PartnerNoteCard.tsx`) the next time they open the app, and stays
 there until they dismiss it (`seen_at` gets set). A person never sees their
 own note as "from partner" - the query excludes rows where `created_by`

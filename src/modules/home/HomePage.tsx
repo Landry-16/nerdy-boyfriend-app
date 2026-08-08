@@ -4,6 +4,7 @@ import { DailyMessageCard } from '../messages/DailyMessageCard'
 import { CounterSummaryCard } from './CounterSummaryCard'
 import { QuickAccessGrid } from './QuickAccessGrid'
 import { PartnerNoteCard } from '../notes/PartnerNoteCard'
+import { NotificationPrompt } from '../notifications/NotificationPrompt'
 import { formatDateLong } from '../../lib/date'
 
 export function HomePage() {
@@ -36,6 +37,8 @@ export function HomePage() {
       >
         Comment tu te sens aujourd'hui ?
       </Link>
+
+      <NotificationPrompt />
     </div>
   )
 }

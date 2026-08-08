@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { createEvent } from './counter.api'
 import { toIsoDate } from '../../lib/date'
 import { DateField } from '../../components/DateField'
+import { notifyPartner } from '../../lib/notify'
 
 export function AddEventForm({ onSaved }: { onSaved: () => void }) {
   const [title, setTitle] = useState('')
@@ -14,6 +15,7 @@ export function AddEventForm({ onSaved }: { onSaved: () => void }) {
     setSaving(true)
     try {
       await createEvent(title, date, isRecurring)
+      notifyPartner('Nouvel evenement', title, '/counter')
       setTitle('')
       onSaved()
     } finally {

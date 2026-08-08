@@ -5,6 +5,7 @@ import { toIsoDate } from '../../lib/date'
 import { LocationPicker } from './LocationPicker'
 import { PhotoPicker } from './PhotoPicker'
 import { DateField } from '../../components/DateField'
+import { notifyPartner } from '../../lib/notify'
 
 export function NewMemoryPage() {
   const navigate = useNavigate()
@@ -34,6 +35,7 @@ export function NewMemoryPage() {
         },
         files,
       )
+      notifyPartner('Nouveau souvenir', title, `/memories/${memory.id}`)
       navigate(`/memories/${memory.id}`)
     } finally {
       setSaving(false)

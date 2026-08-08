@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { createNote } from './notes.api'
 import { DrawingPad } from './DrawingPad'
 import { ToggleButton } from '../../components/ToggleButton'
+import { notifyPartner } from '../../lib/notify'
 import type { NoteKind } from '../../types/database'
 
 export function NoteComposerPage() {
@@ -22,6 +23,7 @@ export function NoteComposerPage() {
     setSaving(true)
     try {
       await createNote(kind, content)
+      notifyPartner('Un petit mot pour toi', kind === 'text' ? content : "Un dessin t'attend.", '/')
       navigate('/')
     } finally {
       setSaving(false)

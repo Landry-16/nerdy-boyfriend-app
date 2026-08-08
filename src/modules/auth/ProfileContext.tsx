@@ -34,10 +34,19 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     }
 
     setLoading(true)
-    const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single()
-    if (error) throw error
-    setProfile(data)
-    setLoading(false)
+    try {
+      // maybeSingle, not single: a signed-in user with no matching profiles
+      // row (should not happen post-migration, but is a real failure mode
+      // worth degrading gracefully from) must resolve to null, not throw -
+      // otherwise loading never clears and the app hangs on a spinner forever.
+      const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle()
+      if (error) throw error
+      setProfile(data)
+    } catch {
+      setProfile(null)
+    } finally {
+      setLoading(false)
+    }
   }, [userId])
 
   useEffect(() => {

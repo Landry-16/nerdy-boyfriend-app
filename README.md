@@ -135,12 +135,23 @@ laying groundwork for attribution in future features (messaging,
 personalized popups).
 
 If you have existing data from before this change (single shared login), the
-migration attaches it to a "legacy" couple, and `0006_backfill_profiles.sql`
-links the original shared-login account's profile straight to it (that
-account predates individual accounts entirely, so it can only be the
-original one). Logging into it after migrating shows the invite code for
-that legacy couple - share it with your partner and have them sign up and
-join with it, and both of you keep the existing history.
+migration attaches it to a "legacy" couple (fixed id
+`00000000-0000-0000-0000-000000000001`). To keep that history, either:
+
+- sign in with the original shared-login account after applying
+  `0006_backfill_profiles.sql` (which gives it a profile, same as any
+  fresh signup) and create a couple from there, then share its invite code
+  and have your partner join with it; or
+- create two fresh individual accounts as usual, and manually link one (or
+  both) to the legacy couple in the SQL editor:
+  ```sql
+  update public.profiles set couple_id = '00000000-0000-0000-0000-000000000001'
+  where id = '<the account's auth.users id>';
+  ```
+
+Either way works; `0006_backfill_profiles.sql` does not assume which one you
+want and leaves the old account's `couple_id` null, same as a brand new
+signup.
 
 ## Data model
 

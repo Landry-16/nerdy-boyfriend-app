@@ -59,3 +59,33 @@ export function toIsoDate(date: Date): string {
   const day = String(date.getDate()).padStart(2, '0')
   return `${year}-${month}-${day}`
 }
+
+/**
+ * A Monday-first calendar grid for the given month, as complete weeks of 7
+ * dates. Days from the adjacent months pad the first/last week so every row
+ * is full; callers dim or ignore cells outside the target month.
+ */
+export function getMonthGrid(year: number, month: number): Date[][] {
+  const firstOfMonth = new Date(year, month, 1)
+  const firstWeekday = (firstOfMonth.getDay() + 6) % 7 // Monday = 0
+  const daysInMonth = new Date(year, month + 1, 0).getDate()
+  const totalCells = Math.ceil((firstWeekday + daysInMonth) / 7) * 7
+  const gridStart = new Date(year, month, 1 - firstWeekday)
+
+  const weeks: Date[][] = []
+  for (let week = 0; week < totalCells / 7; week++) {
+    const days: Date[] = []
+    for (let day = 0; day < 7; day++) {
+      const date = new Date(gridStart)
+      date.setDate(gridStart.getDate() + week * 7 + day)
+      days.push(date)
+    }
+    weeks.push(days)
+  }
+
+  return weeks
+}
+
+export function formatMonthYear(date: Date): string {
+  return date.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
+}

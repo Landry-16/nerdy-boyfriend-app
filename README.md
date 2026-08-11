@@ -69,7 +69,7 @@ npx supabase db push --db-url <your-connection-string>
 ```
 
 Or paste the contents of each file under `supabase/migrations/`, in order
-(`0001_init.sql` through `0007_push_notifications.sql`), and optionally
+(`0001_init.sql` through `0008_per_person_moods.sql`), and optionally
 `supabase/seed.sql`, into the Supabase SQL editor.
 
 No manual account setup needed: each person creates their own account from
@@ -162,7 +162,7 @@ See `supabase/migrations/` for the source of truth. Summary:
   linking to a couple once paired
 - `messages`: the pool of daily messages (compliments, memories, quotes,
   jokes, encouragements, declarations)
-- `moods`: one mood entry per calendar day, per couple
+- `moods`: one mood entry per calendar day, per person (`unique (created_by, mood_date)`)
 - `events`: important dates, optionally recurring yearly
 - `couple_settings`: one row per couple, holding the relationship start date
   used by the day counter
@@ -186,6 +186,21 @@ used only to avoid double-sending push reminders (see "Push notifications").
 `couple_id` and `created_by` are stamped automatically on insert via column
 defaults (`public.current_couple_id()` and `auth.uid()`), so application code
 never sets them explicitly.
+
+### Mood calendar
+
+Each partner logs their own mood per day rather than the couple sharing one
+entry (`0008_per_person_moods.sql` changed the unique constraint from
+`(couple_id, mood_date)` to `(created_by, mood_date)`). `MoodPage` still shows
+a quick picker for *your own* today's mood plus an optional note, but the
+history below it (`MoodCalendar.tsx`) is a real month grid: any day either of
+you logged a mood shows a small emoji pastille per person, ringed in a
+different color (sage for yourself, sky for your partner, based on
+`created_by === session.user.id`) so the two are always distinguishable at a
+glance. Tapping a day with entries opens a small panel below the grid with
+each person's mood and note for that day; only today is editable, past days
+are view-only. Rows from before individual accounts existed have
+`created_by = null` and simply do not render a pastille.
 
 ### Partner notes
 

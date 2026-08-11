@@ -133,7 +133,7 @@ export function MoodCalendar() {
                 {moodEmoji(entry.mood)}
               </span>
               <div>
-                <p className="text-xs text-ink/50">{entry.created_by === userId ? 'Toi' : 'Ton/ta partenaire'}</p>
+                <p className="text-xs text-ink/50">{entry.created_by === userId ? 'Toi' : 'Pas toi'}</p>
                 {entry.note && <p className="text-ink/80">{entry.note}</p>}
               </div>
             </div>
@@ -146,7 +146,7 @@ export function MoodCalendar() {
           <span className="h-3 w-3 rounded-full ring-2 ring-sage-dark" /> Toi
         </span>
         <span className="flex items-center gap-1">
-          <span className="h-3 w-3 rounded-full ring-2 ring-sky" /> Ton/ta partenaire
+          <span className="h-3 w-3 rounded-full ring-2 ring-sky" /> Pas toi
         </span>
       </div>
     </section>

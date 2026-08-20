@@ -38,6 +38,7 @@ src/
     pairing/
     notes/
     room/
+    watchlist/
     notifications/
   sw.ts            custom service worker (push notifications)
   types/           shared TypeScript types, including the Supabase schema
@@ -69,7 +70,7 @@ npx supabase db push --db-url <your-connection-string>
 ```
 
 Or paste the contents of each file under `supabase/migrations/`, in order
-(`0001_init.sql` through `0008_per_person_moods.sql`), and optionally
+(`0001_init.sql` through `0010_watchlist.sql`), and optionally
 `supabase/seed.sql`, into the Supabase SQL editor.
 
 No manual account setup needed: each person creates their own account from
@@ -179,6 +180,9 @@ See `supabase/migrations/` for the source of truth. Summary:
   shared browsing room
 - `push_subscriptions`: one row per device with push notifications enabled
   (endpoint and encryption keys for the Web Push protocol)
+- `watchlist_movies`: the couple's shared list of movies to watch, with
+  optional TMDb enrichment (`tmdb_id`, `poster_path`, `overview`,
+  `release_year`) when a movie was added via search
 
 `events` additionally has `notified_approaching_at` / `notified_today_at`,
 used only to avoid double-sending push reminders (see "Push notifications").
@@ -238,6 +242,23 @@ anything else (`javascript:`, `ftp:`, `mailto:`...) is rejected rather than
 coerced, since blindly prepending `https://` to a non-http(s) scheme
 produces a malformed-but-parseable URL instead of the rejection that input
 deserves.
+
+### Watchlist
+
+`/watchlist` (`src/modules/watchlist/`) is a shared list of movies. Adding
+one searches [TMDb](https://www.themoviedb.org/) as you type
+(`VITE_TMDB_API_KEY`, debounced 400ms) and lets you pick a result to store
+its poster/overview/release year alongside the title; without a configured
+key, or if nothing matches, "Ajouter tel quel" adds a plain title-only entry
+- the feature never requires the API to be usable, only enriched by it.
+TMDb's v3 API key is meant for client-side use per their own docs (read-only
+public data, no billing risk), unlike the Supabase secret key or the VAPID
+private key, both of which must never leave a server context.
+
+"Encore" excludes every movie already shown this session before picking
+again, so rerolling narrows down rather than repeating; "Effacer" resets
+that exclusion set. Both are ephemeral client state, separate from the
+persisted list itself (adding/removing movies is regular CRUD).
 
 ### Map
 

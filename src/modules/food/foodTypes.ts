@@ -15,10 +15,7 @@ export const defaultFoodTypes: FoodType[] = [
   { id: 'burger', label: 'Burger', cuisineTag: 'burger' },
   { id: 'chinese', label: 'Traiteur chinois', cuisineTag: 'chinese' },
   { id: 'mexican', label: 'Mexicain', cuisineTag: 'mexican' },
-  { id: 'kebab', label: 'Kebab', cuisineTag: 'kebab' },
   { id: 'thai', label: 'Thai', cuisineTag: 'thai' },
   { id: 'indian', label: 'Indien', cuisineTag: 'indian' },
-  { id: 'japanese', label: 'Japonais', cuisineTag: 'japanese' },
   { id: 'vietnamese', label: 'Vietnamien', cuisineTag: 'vietnamese' },
-  { id: 'vegetarian', label: 'Vegetarien', cuisineTag: 'vegetarian' },
 ]

@@ -38,6 +38,7 @@ src/
     pairing/
     notes/
     room/
+    food/
     notifications/
   sw.ts            custom service worker (push notifications)
   types/           shared TypeScript types, including the Supabase schema
@@ -69,7 +70,7 @@ npx supabase db push --db-url <your-connection-string>
 ```
 
 Or paste the contents of each file under `supabase/migrations/`, in order
-(`0001_init.sql` through `0008_per_person_moods.sql`), and optionally
+(`0001_init.sql` through `0009_food_types.sql`), and optionally
 `supabase/seed.sql`, into the Supabase SQL editor.
 
 No manual account setup needed: each person creates their own account from
@@ -179,6 +180,8 @@ See `supabase/migrations/` for the source of truth. Summary:
   shared browsing room
 - `push_subscriptions`: one row per device with push notifications enabled
   (endpoint and encryption keys for the Web Push protocol)
+- `food_types`: custom food/cuisine types a couple adds on top of the
+  built-in list (`src/modules/food/foodTypes.ts`)
 
 `events` additionally has `notified_approaching_at` / `notified_today_at`,
 used only to avoid double-sending push reminders (see "Push notifications").
@@ -201,6 +204,23 @@ glance. Tapping a day with entries opens a small panel below the grid with
 each person's mood and note for that day; only today is editable, past days
 are view-only. Rows from before individual accounts existed have
 `created_by = null` and simply do not render a pastille.
+
+### Food picker
+
+`/food` picks randomly from a list of food/cuisine types: a fixed built-in
+list (`src/modules/food/foodTypes.ts`) plus any custom ones the couple adds,
+stored in `food_types`. "Encore" excludes every type already shown in the
+current session before picking again, so rerolling narrows down rather than
+repeating; "Effacer" resets that exclusion set. Both are pure client-side
+state - nothing about the picking session itself is persisted, only the
+list of types is.
+
+Nearby places for the picked type are looked up on demand (button press, not
+automatic) via the browser Geolocation API plus OpenStreetMap's Overpass API
+- the same no-API-key choice already made for the map module. The type's
+`cuisineTag` is matched against OSM's `cuisine` tag within a 3 km radius;
+results are sorted by straight-line distance. Coverage depends entirely on
+how well local places are tagged in OpenStreetMap, which varies by area.
 
 ### Partner notes
 

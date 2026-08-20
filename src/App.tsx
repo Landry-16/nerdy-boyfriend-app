@@ -11,6 +11,7 @@ import { MemoryDetailPage } from './modules/memories/MemoryDetailPage'
 import { MapPage } from './modules/map/MapPage'
 import { NoteComposerPage } from './modules/notes/NoteComposerPage'
 import { RoomPage } from './modules/room/RoomPage'
+import { WatchlistPage } from './modules/watchlist/WatchlistPage'
 
 export default function App() {
   return (
@@ -28,6 +29,7 @@ export default function App() {
               <Route path="/map" element={<MapPage />} />
               <Route path="/notes/new" element={<NoteComposerPage />} />
               <Route path="/room" element={<RoomPage />} />
+              <Route path="/watchlist" element={<WatchlistPage />} />
             </Routes>
           </AppLayout>
         </AuthGate>

@@ -118,6 +118,15 @@ export type PushSubscriptionRow = {
   created_at: string
 }
 
+export type FoodTypeRow = {
+  id: string
+  couple_id: string
+  created_by: string | null
+  label: string
+  cuisine_tag: string
+  created_at: string
+}
+
 // couple_id and created_by are stamped server-side via column defaults
 // (public.current_couple_id() / auth.uid(), see 0003_couples.sql), so
 // callers never need to supply them on insert.
@@ -195,6 +204,12 @@ export type Database = {
         Row: PushSubscriptionRow
         Insert: InsertOf<PushSubscriptionRow, 'user_id' | 'couple_id'>
         Update: Partial<Omit<PushSubscriptionRow, 'id' | 'created_at'>>
+        Relationships: []
+      }
+      food_types: {
+        Row: FoodTypeRow
+        Insert: InsertOf<FoodTypeRow, 'couple_id' | 'created_by'>
+        Update: Partial<Omit<FoodTypeRow, 'id' | 'created_at'>>
         Relationships: []
       }
     }

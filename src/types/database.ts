@@ -118,6 +118,18 @@ export type PushSubscriptionRow = {
   created_at: string
 }
 
+export type WatchlistMovieRow = {
+  id: string
+  couple_id: string
+  created_by: string | null
+  title: string
+  tmdb_id: number | null
+  poster_path: string | null
+  overview: string | null
+  release_year: number | null
+  created_at: string
+}
+
 // couple_id and created_by are stamped server-side via column defaults
 // (public.current_couple_id() / auth.uid(), see 0003_couples.sql), so
 // callers never need to supply them on insert.
@@ -195,6 +207,12 @@ export type Database = {
         Row: PushSubscriptionRow
         Insert: InsertOf<PushSubscriptionRow, 'user_id' | 'couple_id'>
         Update: Partial<Omit<PushSubscriptionRow, 'id' | 'created_at'>>
+        Relationships: []
+      }
+      watchlist_movies: {
+        Row: WatchlistMovieRow
+        Insert: InsertOf<WatchlistMovieRow, 'couple_id' | 'created_by'>
+        Update: Partial<Omit<WatchlistMovieRow, 'id' | 'created_at'>>
         Relationships: []
       }
     }

@@ -12,6 +12,7 @@ import { MapPage } from './modules/map/MapPage'
 import { NoteComposerPage } from './modules/notes/NoteComposerPage'
 import { RoomPage } from './modules/room/RoomPage'
 import { FoodPage } from './modules/food/FoodPage'
+import { WatchlistPage } from './modules/watchlist/WatchlistPage'
 
 export default function App() {
   return (
@@ -30,6 +31,7 @@ export default function App() {
               <Route path="/notes/new" element={<NoteComposerPage />} />
               <Route path="/room" element={<RoomPage />} />
               <Route path="/food" element={<FoodPage />} />
+              <Route path="/watchlist" element={<WatchlistPage />} />
             </Routes>
           </AppLayout>
         </AuthGate>

@@ -1,417 +1,60 @@
 # Nous
 
-Nous is a private progressive web app for a couple: a shared space for daily
-messages, mood tracking, and the moments worth counting. The full product
-concept lives in [Nous-Concept.md](Nous-Concept.md).
+This is a little app I'm building for my girlfriend, mostly just to make her smile. No grand plan, no roadmap, no deadlines — it grows whenever I get a silly new idea at 1am. Some weeks it gets three new features, some months it gets nothing. That's the whole vibe.
 
-This repository implements Phase 1 (home dashboard, message of the day, day
-counter, mood tracking, navigation) and part of Phase 2 of the roadmap:
-memories (souvenirs) and the map. The garden is not built yet. It also
-implements individual accounts that pair up into a couple (see
-"Authentication and pairing" below), replacing the original single
-shared-login model.
+It's a PWA (installable on your phone, works offline-ish), private, just the two of us using it.
 
-## Stack
+## What's actually in it right now
 
-- React + TypeScript, built with Vite
-- Tailwind CSS v4 for styling
-- Supabase (Postgres + Auth + Storage) as the backend
-- Leaflet / react-leaflet with OpenStreetMap tiles for the map
-- `vite-plugin-pwa` for offline support and installability
-- React Router for navigation
+- **Home** — the landing screen: today's message, a quick counter summary, shortcuts to everything else, and a little "petit mot" card if your partner left you something
+- **Message of the day** — a pool of messages (compliments, memories, jokes, whatever) that rotates one a day without repeating until you've seen them all
+- **Compteur** — how many days you've been together, upcoming events, add your own (birthdays, anniversaries, trips...)
+- **Humeur** — each person logs their own mood for the day, shown in a little calendar with a colored dot per person so you can tell who felt what, plus an optional note
+- **Souvenirs** — a photo gallery/timeline of memories: title, date, photos, optional location and a music link
+- **Carte** — every souvenir that has a location shows up as a pin on a map
+- **Petit mot** — leave a text or a doodle for your partner, it pops up on their home screen next time they open the app
+- **Room** — paste a link and browse it together in sync, live. Heads up: most streaming sites (YouTube, Netflix, Crunchyroll...) refuse to be embedded like this, it's a browser-level thing nobody can hack around, so it mostly works well for regular websites. There's always an "open in a new tab" fallback
+- **On mange quoi ?** — random food-type picker (sushi, pizza, burger, whatever you've got) with "encore" and "effacer" buttons, add your own types, and it can suggest actual nearby places for that cuisine
+- **Watchlist** — a shared list of movies to watch, same random-pick idea with "encore"/"effacer", and if you add a TMDb key it pulls posters and info automatically when you search
+- **Push notifications** — get pinged when your partner leaves a note, adds a memory, adds an event, or when an event is coming up / today
+- **Accounts** — each of you has your own login, and you pair up with a short invite code to form a "couple". Everything above is scoped to your couple only
 
-## Project structure
+## Stack, briefly
 
-```
-src/
-  App.tsx          routes and top-level providers
-  components/      shared UI building blocks (Card, BottomNav, layout...)
-  lib/             framework-agnostic helpers (dates, Supabase client, hooks)
-  modules/         one folder per feature, self-contained
-    auth/
-    home/
-    messages/
-    mood/
-    counter/
-    memories/
-    map/
-    pairing/
-    notes/
-    room/
-    food/
-    watchlist/
-    notifications/
-  sw.ts            custom service worker (push notifications)
-  types/           shared TypeScript types, including the Supabase schema
+React + TypeScript + Vite, Tailwind for styling, Supabase for literally everything backend (Postgres, auth, storage, realtime, edge functions), Leaflet + OpenStreetMap for maps/places (free, no API key drama), TMDb for movie info (free key, optional). No paid services required to run this.
 
-supabase/
-  migrations/      SQL migrations, applied in order
-  functions/       Edge Functions (Deno), deployed separately from the app
-  seed.sql         example seed data
-```
-
-Each module owns its own API calls, components, and page. Shared code only
-moves into `lib/` or `components/` once more than one module needs it.
-
-## Getting started
-
-### 1. Install dependencies
+## Running it yourself
 
 ```bash
 npm install
-```
-
-### 2. Create a Supabase project
-
-Create a free project at [supabase.com](https://supabase.com), then apply the
-schema:
-
-```bash
-npx supabase db push --db-url <your-connection-string>
-```
-
-Or paste the contents of each file under `supabase/migrations/`, in order
-(`0001_init.sql` through `0010_watchlist.sql`), and optionally
-`supabase/seed.sql`, into the Supabase SQL editor.
-
-No manual account setup needed: each person creates their own account from
-the app's sign-up screen (see "Authentication" below).
-
-**Local development without a hosted project:** `npx supabase start` runs
-the full stack (Postgres, Auth, Storage) in Docker and applies every
-migration and the seed automatically. Point `.env` at the printed API URL
-and `publishable`/`anon` key instead of a hosted project's. Useful for
-trying out schema changes without touching real data. `npx supabase stop`
-shuts it down.
-
-### 3. Configure environment variables
-
-```bash
 cp .env.example .env
 ```
 
-Fill in `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` from your Supabase
-project settings ("API" section).
+Then:
 
-### 4. Run the app
+1. Make a free [Supabase](https://supabase.com) project
+2. Run everything in `supabase/migrations/` in order (paste each file into the Supabase SQL editor, `0001` through the highest number you see)
+3. Fill in `.env` with your Supabase URL/anon key (Project Settings > API)
+4. `npm run dev`
 
-```bash
-npm run dev
-```
+Each person creates their own account from the sign-up screen, then one of you taps "créer notre couple" to get an invite code and shares it with the other.
 
-## Scripts
+Optional env vars, both totally skippable (things just degrade gracefully without them):
+- `VITE_VAPID_PUBLIC_KEY` — needed for push notifications, see the Push notifications section further down for the full setup (it's a bit involved, Edge Functions and all)
+- `VITE_TMDB_API_KEY` — free key from [themoviedb.org](https://www.themoviedb.org), unlocks movie search in the watchlist. Without it you can still add movies, just by typing the title yourself
 
-| Command | Description |
-| --- | --- |
-| `npm run dev` | Start the local dev server |
-| `npm run build` | Type-check and build for production |
-| `npm run preview` | Preview the production build locally |
-| `npm run lint` | Run oxlint |
-| `npm run generate-icons` | Regenerate PWA icons from `scripts/icon-source.svg` |
-
-## Authentication and pairing
-
-Each person has their own Supabase Auth account. Two accounts pair up into a
-**couple** using a short invite code:
-
-1. The first person signs up and creates a couple (`create_couple()`), which
-   generates a 6-character invite code.
-2. They share that code with their partner (text, call, however).
-3. The partner signs up and enters the code (`join_couple_by_code(code)`) to
-   join.
-
-Both functions live in `0003_couples.sql`, run with elevated privileges
-(`security definer`), and enforce the two business rules that matter here —
-you can only be in one couple, and a couple has at most 2 members — entirely
-server-side, so a buggy or malicious client cannot bypass them. Until both
-people have joined, the app shows a waiting screen with the invite code
-(`src/modules/pairing/`).
-
-**Data isolation:** every table is scoped to `couple_id`, and every Row Level
-Security policy filters on it (`couple_id = public.current_couple_id()`).
-This is the reason the pairing model exists in the schema at all: with
-multiple couples now sharing the same Supabase project, RLS has to keep them
-from seeing each other's data, not just gate on "signed in". `created_by`
-columns record who did what within a couple (not used for access control),
-laying groundwork for attribution in future features (messaging,
-personalized popups).
-
-If you have existing data from before this change (single shared login), the
-migration attaches it to a "legacy" couple (fixed id
-`00000000-0000-0000-0000-000000000001`). To keep that history, either:
-
-- sign in with the original shared-login account after applying
-  `0006_backfill_profiles.sql` (which gives it a profile, same as any
-  fresh signup) and create a couple from there, then share its invite code
-  and have your partner join with it; or
-- create two fresh individual accounts as usual, and manually link one (or
-  both) to the legacy couple in the SQL editor:
-  ```sql
-  update public.profiles set couple_id = '00000000-0000-0000-0000-000000000001'
-  where id = '<the account's auth.users id>';
-  ```
-
-Either way works; `0006_backfill_profiles.sql` does not assume which one you
-want and leaves the old account's `couple_id` null, same as a brand new
-signup.
-
-## Data model
-
-See `supabase/migrations/` for the source of truth. Summary:
-
-- `couples`: one row per couple, holding the invite code
-- `profiles`: one row per user (auto-created on signup via a trigger),
-  linking to a couple once paired
-- `messages`: the pool of daily messages (compliments, memories, quotes,
-  jokes, encouragements, declarations)
-- `moods`: one mood entry per calendar day, per person (`unique (created_by, mood_date)`)
-- `events`: important dates, optionally recurring yearly
-- `couple_settings`: one row per couple, holding the relationship start date
-  used by the day counter
-- `memories`: souvenirs (title, date, description, optional location name and
-  coordinates, optional music link)
-- `memory_photos`: one or more photos per memory, stored in the
-  `memory-photos` Supabase Storage bucket (public, but paths are random
-  UUIDs, so effectively unguessable; upload/delete is still restricted to the
-  owning couple)
-- `notes`: a text message or a small drawing one partner leaves for the
-  other; `content` is plain text for `kind = 'text'`, or a PNG data URL for
-  `kind = 'drawing'` (small enough that a Storage bucket would be overkill)
-- `browse_room`: one row per couple, holding the URL currently shown in the
-  shared browsing room
-- `push_subscriptions`: one row per device with push notifications enabled
-  (endpoint and encryption keys for the Web Push protocol)
-- `food_types`: custom food/cuisine types a couple adds on top of the
-  built-in list (`src/modules/food/foodTypes.ts`)
-- `watchlist_movies`: the couple's shared list of movies to watch, with
-  optional TMDb enrichment (`tmdb_id`, `poster_path`, `overview`,
-  `release_year`) when a movie was added via search
-
-`events` additionally has `notified_approaching_at` / `notified_today_at`,
-used only to avoid double-sending push reminders (see "Push notifications").
-
-`couple_id` and `created_by` are stamped automatically on insert via column
-defaults (`public.current_couple_id()` and `auth.uid()`), so application code
-never sets them explicitly.
-
-### Mood calendar
-
-Each partner logs their own mood per day rather than the couple sharing one
-entry (`0008_per_person_moods.sql` changed the unique constraint from
-`(couple_id, mood_date)` to `(created_by, mood_date)`). `MoodPage` still shows
-a quick picker for *your own* today's mood plus an optional note, but the
-history below it (`MoodCalendar.tsx`) is a real month grid: any day either of
-you logged a mood shows a small emoji pastille per person, ringed in a
-different color (sage for yourself, sky for your partner, based on
-`created_by === session.user.id`) so the two are always distinguishable at a
-glance. Tapping a day with entries opens a small panel below the grid with
-each person's mood and note for that day; only today is editable, past days
-are view-only. Rows from before individual accounts existed have
-`created_by = null` and simply do not render a pastille.
-
-### Food picker
-
-`/food` picks randomly from a list of food/cuisine types: a fixed built-in
-list (`src/modules/food/foodTypes.ts`) plus any custom ones the couple adds,
-stored in `food_types`. "Encore" excludes every type already shown in the
-current session before picking again, so rerolling narrows down rather than
-repeating; "Effacer" resets that exclusion set. Both are pure client-side
-state - nothing about the picking session itself is persisted, only the
-list of types is.
-
-Nearby places for the picked type are looked up on demand (button press, not
-automatic) via the browser Geolocation API plus OpenStreetMap's Overpass API
-- the same no-API-key choice already made for the map module. The type's
-`cuisineTag` is matched against OSM's `cuisine` tag within a 3 km radius;
-results are sorted by straight-line distance. Coverage depends entirely on
-how well local places are tagged in OpenStreetMap, which varies by area.
-
-### Partner notes
-
-Either partner can leave a short message or doodle
-(`src/modules/notes/NoteComposerPage.tsx`, reachable from the bottom nav's
-"Petit mot" tab). It shows up as a card on the *other* person's home
-screen (`PartnerNoteCard.tsx`) the next time they open the app, and stays
-there until they dismiss it (`seen_at` gets set). A person never sees their
-own note as "from partner" - the query excludes rows where `created_by`
-matches the viewer. This is the first feature built on top of the
-`created_by` attribution columns added for the couples migration.
-
-### Shared room
-
-`/room` (`src/modules/room/`) is a single page both partners can point at the
-same URL, kept in sync live via Supabase Realtime (`postgres_changes` on
-`browse_room`, added to the `supabase_realtime` publication in
-`0005_room.sql`) rather than polling. Either partner can navigate; there is
-no lock or turn order.
-
-This is a **best-effort** feature, worth understanding before relying on it:
-the page is displayed in an iframe, and most sites - every video streaming
-platform in particular (YouTube, Crunchyroll, Netflix...) - explicitly
-refuse to be framed via `X-Frame-Options` or a `frame-ancestors` Content
-Security Policy. This is enforced by the browser itself; page JavaScript has
-no reliable way to detect it (no `onerror` fires for a framing refusal, the
-frame just renders blank or shows the browser's own refusal page), so the
-app does not try to. Instead it always shows an "open in a new tab" link
-next to the iframe as the fallback. General websites without such
-restrictions (many blogs, wikis, smaller sites) work fine embedded.
-
-`normalizeUrl` (`src/modules/room/normalizeUrl.ts`) only accepts input with
-no scheme (prefixed with `https://`) or an explicit `http(s)://` scheme;
-anything else (`javascript:`, `ftp:`, `mailto:`...) is rejected rather than
-coerced, since blindly prepending `https://` to a non-http(s) scheme
-produces a malformed-but-parseable URL instead of the rejection that input
-deserves.
-
-### Watchlist
-
-`/watchlist` (`src/modules/watchlist/`) is a shared list of movies. Adding
-one searches [TMDb](https://www.themoviedb.org/) as you type
-(`VITE_TMDB_API_KEY`, debounced 400ms) and lets you pick a result to store
-its poster/overview/release year alongside the title; without a configured
-key, or if nothing matches, "Ajouter tel quel" adds a plain title-only entry
-- the feature never requires the API to be usable, only enriched by it.
-TMDb's v3 API key is meant for client-side use per their own docs (read-only
-public data, no billing risk), unlike the Supabase secret key or the VAPID
-private key, both of which must never leave a server context.
-
-"Encore" excludes every movie already shown this session before picking
-again, so rerolling narrows down rather than repeating; "Effacer" resets
-that exclusion set. Both are ephemeral client state, separate from the
-persisted list itself (adding/removing movies is regular CRUD).
-
-### Map
-
-The map (`/map`) is not backed by its own table: it plots every memory that
-has latitude/longitude set. Coordinates are captured by tapping a small
-Leaflet map in the "new memory" form (`src/modules/memories/LocationPicker.tsx`);
-there is no geocoding step, which keeps the app free of any third-party API
-key. Memories without coordinates simply do not appear on the map.
-
-### Quick access grid
-
-Modules that are not already surfaced on the home screen (unlike messages,
-mood, and the counter, which have their own cards) get a small cute icon tile
-instead, added to the list in `src/modules/home/QuickAccessGrid.tsx`. New
-modules should extend that list rather than growing the bottom navigation.
-
-### Message of the day rotation
-
-Messages are shown one per day, deterministically, with no repeats until every
-message has been shown once (see `src/modules/messages/dailyMessage.ts`).
-Days are grouped into cycles the length of the message pool; each cycle is an
-independent seeded shuffle, so the order changes cycle to cycle while still
-guaranteeing full coverage before anything repeats.
-
-### Push notifications
-
-Real OS-level push notifications - the kind that reach a phone even when the
-app is closed - fire for five triggers: a partner sends a note, adds a
-memory, adds an event, an event is `APPROACHING_DAYS` (7) away, and an event
-is today. This needs more than the frontend: nothing running only in the
-browser tab can wake up days later to check whether an event is approaching.
-
-**Pieces involved:**
-
-- `push_subscriptions` table (`0007_push_notifications.sql`): one row per
-  device a user has enabled notifications on. RLS only lets a user read/write
-  their *own* rows - their partner's raw push endpoint and keys are not
-  couple data - so sending to the partner always goes through the service
-  role key in an Edge Function, never the client directly.
-- `src/sw.ts`: a hand-written service worker (the PWA plugin runs in
-  `injectManifest` mode instead of its default `generateSW` specifically to
-  allow this) with `push` and `notificationclick` handlers.
-- `src/modules/notifications/`: requests permission, subscribes, and saves
-  the subscription. `NotificationPrompt` on the home screen is the entry
-  point; it only shows when supported and not already granted/dismissed
-  (dismissal is remembered in `localStorage`).
-- `supabase/functions/send-push`: called directly by the client right after
-  it creates a note, memory, or event (`src/lib/notify.ts`, fire-and-forget -
-  a failed push must never block the action that triggered it). Resolves the
-  caller's `couple_id` from their own JWT server-side rather than trusting a
-  client-supplied value, so a client cannot ask it to notify a couple it
-  does not belong to.
-- `supabase/functions/check-event-reminders`: scheduled once a day (not
-  client-triggered) via `pg_cron`. Checks every event across every couple for
-  the "approaching" and "today" triggers, using `notified_approaching_at` /
-  `notified_today_at` to avoid double-sending - compared against *today's
-  date only*, so a recurring event correctly notifies again next year with
-  no extra reset logic.
-
-**Setup, after applying `0007_push_notifications.sql`:**
-
-1. Generate a VAPID key pair (skip if you already have one):
-   ```bash
-   npx web-push generate-vapid-keys
-   ```
-2. Client: set `VITE_VAPID_PUBLIC_KEY` to the public key in `.env` (local)
-   and in your hosting platform's environment variables (see "Vercel" below).
-3. Deploy the two Edge Functions:
-   ```bash
-   npx supabase functions deploy send-push
-   npx supabase functions deploy check-event-reminders
-   ```
-4. Set their secrets (private key never goes in any committed file or the
-   client env):
-   ```bash
-   npx supabase secrets set VAPID_PUBLIC_KEY=<public key>
-   npx supabase secrets set VAPID_PRIVATE_KEY=<private key>
-   npx supabase secrets set VAPID_SUBJECT=mailto:you@example.com
-   npx supabase secrets set CRON_SECRET=<any random string>
-   ```
-5. Schedule the daily check in the Supabase SQL editor (`pg_cron` and
-   `pg_net` are enabled by default on hosted projects; `<project-ref>` is in
-   your project's URL, the service role key is under Project Settings > API):
-   ```sql
-   select cron.schedule(
-     'daily-event-reminders',
-     '0 8 * * *', -- 08:00 UTC daily; adjust to taste
-     $$
-     select net.http_post(
-       url := 'https://<project-ref>.supabase.co/functions/v1/check-event-reminders',
-       headers := jsonb_build_object(
-         'Authorization', 'Bearer <service role key>',
-         'x-cron-secret', '<the CRON_SECRET you set above>'
-       )
-     )
-     $$
-   );
-   ```
-
-Without this setup the app still works; `NotificationPrompt` simply fails
-silently to subscribe (no `VITE_VAPID_PUBLIC_KEY`), and `notifyPartner()`
-calls fail silently too (no deployed `send-push` function) - by design, per
-the "must never block the action that triggered it" rule above.
+Want to mess with the database without touching the real one? `npx supabase start` spins up a full local copy (Postgres, auth, storage, the works) in Docker, migrations and all. `npx supabase stop` when you're done.
 
 ## Deploying
 
-The app builds to static files (`npm run build` outputs to `dist/`), so it can
-be hosted on any static host that supports PWAs (Vercel, Netlify, Cloudflare
-Pages...). Set the same environment variables as in `.env.example` on the
-hosting platform. `vercel.json` rewrites every path to `index.html`, which
-client-side routes (React Router) need to work on deep links and refresh.
+It's just a static build (`npm run build`), so it runs on Vercel/Netlify/whatever. `vercel.json` is already set up for Vercel specifically (handles the client-side routing). Push to GitHub, import the repo on Vercel, add your env vars there too (separately from your local `.env` — easy to forget), deploy. Every push to `main` after that redeploys on its own.
 
-### Vercel
+## Push notifications (the annoying-but-worth-it part)
 
-1. Push this repository to GitHub (already done if you are reading this from
-   the repo).
-2. On [vercel.com](https://vercel.com), sign in with GitHub, then
-   "Add New... > Project" and import this repository. Vercel auto-detects the
-   Vite framework preset (`npm run build`, output directory `dist`) with no
-   extra configuration needed.
-3. Before the first deploy, add the environment variables under
-   "Environment Variables": `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`,
-   and `VITE_VAPID_PUBLIC_KEY` (see "Push notifications" for that last one).
-   Use the **anon/publishable** key from Supabase (Project Settings > API
-   Keys), never the secret key: the secret key must never reach the browser,
-   and Supabase itself rejects it client-side.
-4. Deploy. Every future push to `main` redeploys automatically.
+This one needs actual backend infra, not just a database table: two Supabase Edge Functions (`send-push` and `check-event-reminders`), a VAPID key pair for Web Push, and a daily cron job for the "event coming up / event today" reminders. It's genuinely a few extra steps — deploy the functions, set some secrets, schedule the cron in the SQL editor. Worth it for the "oh they thought of me" notification hit, but don't feel bad if you skip it, the rest of the app works fine without it.
 
-## Roadmap
+## A note on data
 
-Phase 1: home, message of the day, counter, mood, navigation. Phase 2
-(partial): memories gallery and map. Beyond the original concept: individual
-accounts + couple pairing, partner notes/doodles, a shared browsing room, and
-push notifications. Not yet built: the garden, the food picker, and further
-polish (Phases 2 remainder, 3, 4). See [Nous-Concept.md](Nous-Concept.md) for
-the full original plan.
+Everything's private to your couple — nobody else using this code (if anyone ever did) could see your stuff, that's enforced at the database level, not just hidden in the UI. No ads, no analytics, no tracking, no third party ever sees your data except Supabase (hosting it) and, for the two optional bits, OpenStreetMap (place lookups) and TMDb (movie posters).
+
+That's it. If you're reading this because you cloned it for your own person: hope it makes them smile too.

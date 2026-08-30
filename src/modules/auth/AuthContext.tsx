@@ -44,7 +44,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { display_name: displayName } },
+      options: {
+        data: { display_name: displayName },
+        // Without this, the confirmation email links back to whatever
+        // "Site URL" is set in the Supabase dashboard - a fresh project
+        // defaults that to http://localhost:3000, which is wrong in
+        // production. window.location.origin is correct in both local dev
+        // and prod. Supabase-js auto-detects the token in this URL on load
+        // (detectSessionInUrl, on by default), so no callback route is needed.
+        emailRedirectTo: window.location.origin,
+      },
     })
     if (error) throw error
     return data.session !== null
